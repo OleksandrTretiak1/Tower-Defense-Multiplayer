@@ -106,3 +106,5 @@ InitTestScene*.unity*
 
 /[Aa]ndroid[Bb]uilds/*_BackUpThisFolder*
 /[Aa]ndroid[Bb]uilds/*_BurstDebugInformation*
+
+*_clone_*/
