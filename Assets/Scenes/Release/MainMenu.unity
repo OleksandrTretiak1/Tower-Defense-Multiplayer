@@ -7298,18 +7298,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 61fa662f58c1bac40949e9a0b4a7b28d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LobbyManager
-  buttonsPanel: {fileID: 1842245799}
-  levelSelectPanel: {fileID: 1048067439}
-  multiplayerButtonsPanel: {fileID: 1973099653}
-  hostInterfacePanel: {fileID: 236331856}
-  joinInterfacePanel: {fileID: 308610663}
-  ipInputField: {fileID: 1642183137}
-  hostIpDisplayText: {fileID: 1405079070}
-  levelSelectDropdown: {fileID: 461347692}
-  level1BestText: {fileID: 232883258}
-  level2BestText: {fileID: 1202440349}
-  menuMusic: {fileID: 1687457181}
-  musicToggle: {fileID: 1180019567}
+  StartButtonsPanel: {fileID: 1842245799}
+  LevelSelectPanel: {fileID: 1048067439}
+  MultiplayerButtonsPanel: {fileID: 1973099653}
+  HostInterfacePanel: {fileID: 236331856}
+  JoinInterfacePanel: {fileID: 308610663}
+  IpInputField: {fileID: 1642183137}
+  HostIpDisplayText: {fileID: 1405079070}
+  LevelSelectDropdown: {fileID: 461347692}
+  Level1BestText: {fileID: 232883258}
+  Level2BestText: {fileID: 1202440349}
+  MenuMusic: {fileID: 1687457181}
+  MusicToggle: {fileID: 1180019567}
 --- !u!1 &2074008617
 GameObject:
   m_ObjectHideFlags: 0

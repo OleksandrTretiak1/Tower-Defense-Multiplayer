@@ -9,63 +9,75 @@ using System.Net.Sockets;
 public class LobbyManager : MonoBehaviour
 {
     [Header("UI Panels - Singleplayer")]
-    public GameObject buttonsPanel;
-    public GameObject levelSelectPanel;
+    public GameObject StartButtonsPanel;
+    public GameObject LevelSelectPanel;
 
     [Header("UI Panels - Multiplayer")]
-    public GameObject multiplayerButtonsPanel;
-    public GameObject hostInterfacePanel;
-    public GameObject joinInterfacePanel;
+    public GameObject MultiplayerButtonsPanel;
+    public GameObject HostInterfacePanel;
+    public GameObject JoinInterfacePanel;
 
     [Header("Multiplayer Elements")]
-    public TMP_InputField ipInputField;
-    public TextMeshProUGUI hostIpDisplayText;
-    public TMP_Dropdown levelSelectDropdown;
+    public TMP_InputField IpInputField;
+    public TextMeshProUGUI HostIpDisplayText;
+    public TMP_Dropdown LevelSelectDropdown;
 
     [Header("Level Highscores")]
-    public TextMeshProUGUI level1BestText;
-    public TextMeshProUGUI level2BestText;
+    public TextMeshProUGUI Level1BestText;
+    public TextMeshProUGUI Level2BestText;
 
     [Header("Audio Settings")]
-    public AudioSource menuMusic;
-    public Toggle musicToggle;
+    public AudioSource MenuMusic;
+    public Toggle MusicToggle;
 
-    private bool isWaitingForPlayer = false;
+    private bool _isWaitingForPlayer = false;
 
     void Start()
     {
-        buttonsPanel.SetActive(true);
+        StartButtonsPanel.SetActive(true);
 
-        levelSelectPanel.SetActive(false);
-        multiplayerButtonsPanel.SetActive(false);
-        hostInterfacePanel.SetActive(false);
-        joinInterfacePanel.SetActive(false);
+        LevelSelectPanel.SetActive(false);
+        MultiplayerButtonsPanel.SetActive(false);
+        HostInterfacePanel.SetActive(false);
+        JoinInterfacePanel.SetActive(false);
 
         bool isMusicOn = PlayerPrefs.GetInt("MusicEnabled", 1) == 1;
-        if (musicToggle != null) musicToggle.isOn = isMusicOn;
-        if (menuMusic != null) menuMusic.mute = !isMusicOn;
+
+        if (MusicToggle != null)
+        {
+            MusicToggle.isOn = isMusicOn;
+        }
+
+        if (MenuMusic != null)
+        {
+            MenuMusic.mute = !isMusicOn;
+        }
 
         UpdateHighscores();
     }
 
-    private void UpdateHighscores()
+    void Update()
     {
-        if (level1BestText != null)
-            level1BestText.text = "Best: " + PlayerPrefs.GetInt("Highscore_Level1", 0);
-
-        if (level2BestText != null)
-            level2BestText.text = "Best: " + PlayerPrefs.GetInt("Highscore_Level2", 0);
+        if (_isWaitingForPlayer && NetworkServer.active && NetworkServer.connections.Count == 2)
+        {
+            _isWaitingForPlayer = false;
+            StartMatchAutomatically();
+        }
     }
 
     public void OpenLevelSelect()
     {
-        buttonsPanel.SetActive(false);
-        levelSelectPanel.SetActive(true);
+        StartButtonsPanel.SetActive(false);
+        LevelSelectPanel.SetActive(true);
     }
 
     public void ToggleMusic(bool isEnabled)
     {
-        if (menuMusic != null) menuMusic.mute = !isEnabled;
+        if (MenuMusic != null)
+        {
+            MenuMusic.mute = !isEnabled;
+        }
+
         PlayerPrefs.SetInt("MusicEnabled", isEnabled ? 1 : 0);
         PlayerPrefs.Save();
     }
@@ -90,31 +102,33 @@ public class LobbyManager : MonoBehaviour
 
     public void OpenMultiplayerMenu()
     {
-        buttonsPanel.SetActive(false);
-        multiplayerButtonsPanel.SetActive(true);
+        StartButtonsPanel.SetActive(false);
+        MultiplayerButtonsPanel.SetActive(true);
     }
 
     public void OpenHostInterface()
     {
-        multiplayerButtonsPanel.SetActive(false);
-        hostInterfacePanel.SetActive(true);
+        MultiplayerButtonsPanel.SetActive(false);
+        HostInterfacePanel.SetActive(true);
 
         NetworkManager.singleton.StartHost();
-        isWaitingForPlayer = true;
-        if (hostIpDisplayText != null)
+        _isWaitingForPlayer = true;
+
+        if (HostIpDisplayText != null)
         {
-            hostIpDisplayText.text = "IP: " + GetLocalIPAddress();
+            HostIpDisplayText.text = "IP: " + GetLocalIPAddress();
         }
     }
 
     public void OpenJoinInterface()
     {
-        multiplayerButtonsPanel.SetActive(false);
-        joinInterfacePanel.SetActive(true);
+        MultiplayerButtonsPanel.SetActive(false);
+        JoinInterfacePanel.SetActive(true);
     }
+
     public void ConnectToHost()
     {
-        string ipAddress = ipInputField.text;
+        string ipAddress = IpInputField.text;
 
         if (string.IsNullOrEmpty(ipAddress))
         {
@@ -127,14 +141,27 @@ public class LobbyManager : MonoBehaviour
 
     public void BackToMainMenu()
     {
-        levelSelectPanel.SetActive(false);
-        multiplayerButtonsPanel.SetActive(false);
-        hostInterfacePanel.SetActive(false);
-        joinInterfacePanel.SetActive(false);
+        LevelSelectPanel.SetActive(false);
+        MultiplayerButtonsPanel.SetActive(false);
+        HostInterfacePanel.SetActive(false);
+        JoinInterfacePanel.SetActive(false);
 
-        buttonsPanel.SetActive(true);
+        StartButtonsPanel.SetActive(true);
 
         StopNetwork();
+    }
+
+    private void UpdateHighscores()
+    {
+        if (Level1BestText != null)
+        {
+            Level1BestText.text = "Best: " + PlayerPrefs.GetInt("Highscore_Level1", 0);
+        }
+
+        if (Level2BestText != null)
+        {
+            Level2BestText.text = "Best: " + PlayerPrefs.GetInt("Highscore_Level2", 0);
+        }
     }
 
     private void StopNetwork()
@@ -152,6 +179,7 @@ public class LobbyManager : MonoBehaviour
     private string GetLocalIPAddress()
     {
         var host = Dns.GetHostEntry(Dns.GetHostName());
+
         foreach (var ip in host.AddressList)
         {
             if (ip.AddressFamily == AddressFamily.InterNetwork)
@@ -159,21 +187,13 @@ public class LobbyManager : MonoBehaviour
                 return ip.ToString();
             }
         }
-        return "IP не знайдено";
-    }
 
-    void Update()
-    {
-        if (isWaitingForPlayer && NetworkServer.active && NetworkServer.connections.Count == 2)
-        {
-            isWaitingForPlayer = false;
-            StartMatchAutomatically();
-        }
+        return "IP not found";
     }
 
     private void StartMatchAutomatically()
     {
-        string selectedLevelName = levelSelectDropdown.options[levelSelectDropdown.value].text;
+        string selectedLevelName = LevelSelectDropdown.options[LevelSelectDropdown.value].text;
         NetworkManager.singleton.ServerChangeScene(selectedLevelName);
     }
 }
