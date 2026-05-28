@@ -92,6 +92,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e683560798ea48b47abb450ded9e5d85, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Node
+  turret: {fileID: 0}
 --- !u!1 &5258740254782098865
 GameObject:
   m_ObjectHideFlags: 0

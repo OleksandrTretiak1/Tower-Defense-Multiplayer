@@ -1,4 +1,5 @@
 using UnityEngine;
+using Mirror;
 
 public class BuildManager : MonoBehaviour
 {
@@ -19,10 +20,21 @@ public class BuildManager : MonoBehaviour
 
     void Awake()
     {
-        if (instance == null) instance = this;
+        if (instance == null)
+        {
+            instance = this;
+        }
     }
 
     public void BuildTurretOn(Node node, string type)
+    {
+        if (NetworkPlayer.LocalPlayer != null)
+        {
+            NetworkPlayer.LocalPlayer.CmdBuildTurret(node.transform.position, type);
+        }
+    }
+
+    public void ServerBuildTurret(Node node, string type)
     {
         GameObject turretToBuild = null;
         int price = 0;
@@ -43,6 +55,9 @@ public class BuildManager : MonoBehaviour
             GameObject turret = Instantiate(turretToBuild, node.transform.position, Quaternion.identity);
             node.turret = turret;
             node.SetTurret(turret, price);
+
+            NetworkServer.Spawn(turret);
+
             PlayBuildSound("build");
         }
     }
@@ -51,9 +66,18 @@ public class BuildManager : MonoBehaviour
     {
         AudioClip clipToPlay = null;
 
-        if (type == "build") clipToPlay = globalBuildSound;
-        else if (type == "upgrade") clipToPlay = globalUpgradeSound;
-        else if (type == "sell") clipToPlay = globalSellSound;
+        if (type == "build")
+        {
+            clipToPlay = globalBuildSound;
+        }
+        else if (type == "upgrade")
+        {
+            clipToPlay = globalUpgradeSound;
+        }
+        else if (type == "sell")
+        {
+            clipToPlay = globalSellSound;
+        }
 
         if (clipToPlay != null)
         {

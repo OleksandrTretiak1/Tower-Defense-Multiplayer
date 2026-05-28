@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 2172164016295091969}
   - component: {fileID: 2786838972487401078}
   - component: {fileID: 1107202390474873800}
-  - component: {fileID: 8818370462865380546}
   m_Layer: 0
   m_Name: NetworkManager
   m_TagString: Untagged
@@ -108,17 +107,3 @@ MonoBehaviour:
   debugLog: 0
   statisticsGUI: 0
   statisticsLog: 0
---- !u!114 &8818370462865380546
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5731979581838955961}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6442dc8070ceb41f094e44de0bf87274, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Mirror::Mirror.NetworkManagerHUD
-  offsetX: 0
-  offsetY: 0

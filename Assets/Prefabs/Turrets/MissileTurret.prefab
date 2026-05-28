@@ -961,6 +961,7 @@ GameObject:
   m_Component:
   - component: {fileID: 353732959814573532}
   - component: {fileID: -920890576494607531}
+  - component: {fileID: 8805123269765812926}
   m_Layer: 0
   m_Name: MissileTurret
   m_TagString: Untagged
@@ -1017,6 +1018,25 @@ MonoBehaviour:
   firePointCenter: {fileID: 5506921581040963861}
   shootingAudioSource: {fileID: 5060203602957525766}
   shootSound: {fileID: 8300000, guid: e8210ab1fe6784e7eb15956b135716c9, type: 3}
+  upgradeCostLvl2: 120
+  upgradeCostLvl3: 250
+--- !u!114 &8805123269765812926
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8224298794960880972}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Mirror::Mirror.NetworkIdentity
+  sceneId: 0
+  _assetId: 838734246
+  serverOnly: 0
+  visibility: 0
+  hasSpawned: 0
 --- !u!1 &8244194635323360269
 GameObject:
   m_ObjectHideFlags: 0
