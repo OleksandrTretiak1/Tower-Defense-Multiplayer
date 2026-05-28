@@ -1,10 +1,12 @@
 using UnityEngine;
 using System.Collections.Generic;
+using Mirror;
 
-public class EnemyHealth : MonoBehaviour
+public class EnemyHealth : NetworkBehaviour
 {
     public static List<EnemyHealth> AllEnemies = new List<EnemyHealth>();
 
+    [SyncVar]
     [SerializeField] private int health = 50;
 
     [Header("Death Effects")]
@@ -29,6 +31,11 @@ public class EnemyHealth : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
+        if (!isServer)
+        {
+            return;
+        }
+
         health -= damage;
 
         if (health <= 0)
@@ -37,11 +44,20 @@ public class EnemyHealth : MonoBehaviour
         }
     }
 
+    [Server]
     void Die()
+    {
+        RpcHandleDeath(transform.position);
+
+        NetworkServer.Destroy(gameObject);
+    }
+
+    [ClientRpc]
+    void RpcHandleDeath(Vector3 deathPosition)
     {
         if (deathVFX != null)
         {
-            Instantiate(deathVFX, transform.position, Quaternion.identity);
+            Instantiate(deathVFX, deathPosition, Quaternion.identity);
         }
 
         if (deathSound != null)
@@ -53,16 +69,16 @@ public class EnemyHealth : MonoBehaviour
         {
             CurrencyManager.instance.AddMoney(moneyReward);
         }
-        
-        Destroy(gameObject);
     }
 
     void PlaySound2D(AudioClip clip)
     {
-        if (clip == null) return;
+        if (clip == null)
+        {
+            return;
+        }
 
         GameObject tempGO = new GameObject("TempAudio_Death");
-
         AudioSource aSource = tempGO.AddComponent<AudioSource>();
 
         aSource.clip = clip;

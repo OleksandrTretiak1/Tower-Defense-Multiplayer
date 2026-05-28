@@ -1,73 +1,93 @@
 using UnityEngine;
+using Mirror;
 
-public class WaypointFollower : MonoBehaviour
+public class WaypointFollower : NetworkBehaviour
 {
-    public int GetWaypointIndex() => currentWaypointIndex;
-    public float GetDistanceToWaypoint()
-    {
-        if (waypoints == null || waypoints.Length == 0) return Mathf.Infinity;
-
-        if (currentWaypointIndex < waypoints.Length)
-        {
-            return Vector2.Distance(transform.position, waypoints[currentWaypointIndex].position);
-        }
-        return 0f;
-    }
-
     [SerializeField] private float speed = 2f;
     [SerializeField] private float rotationSpeed = 10f;
-    private Transform[] waypoints;
-    private int currentWaypointIndex = 0;
+
+    private Transform[] _waypoints;
+    private int _currentWaypointIndex = 0;
 
     void Awake()
     {
         GameObject pointsParent = GameObject.Find("Waypoints");
+
         if (pointsParent != null)
         {
-            waypoints = new Transform[pointsParent.transform.childCount];
-            for (int i = 0; i < waypoints.Length; i++)
+            _waypoints = new Transform[pointsParent.transform.childCount];
+
+            for (int i = 0; i < _waypoints.Length; i++)
             {
-                waypoints[i] = pointsParent.transform.GetChild(i);
+                _waypoints[i] = pointsParent.transform.GetChild(i);
             }
 
-            transform.position = waypoints[0].position;
+            transform.position = _waypoints[0].position;
 
-            if (waypoints.Length > 1)
+            if (_waypoints.Length > 1)
             {
-                Vector2 dir = waypoints[1].position - transform.position;
+                Vector2 dir = _waypoints[1].position - transform.position;
                 float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
                 transform.rotation = Quaternion.Euler(0, 0, angle);
-                currentWaypointIndex = 1;
+                _currentWaypointIndex = 1;
             }
         }
     }
 
     void Update()
     {
-        if (waypoints == null || currentWaypointIndex >= waypoints.Length) return;
+        if (!isServer)
+        {
+            return;
+        }
+
+        if (_waypoints == null || _currentWaypointIndex >= _waypoints.Length)
+        {
+            return;
+        }
 
         Move();
         RotateTowardsTarget();
     }
 
-    void Move()
+    public int GetWaypointIndex()
     {
-        transform.position = Vector2.MoveTowards(transform.position,
-            waypoints[currentWaypointIndex].position, speed * Time.deltaTime);
+        return _currentWaypointIndex;
+    }
 
-        if (Vector2.Distance(transform.position, waypoints[currentWaypointIndex].position) < 0.05f)
+    public float GetDistanceToWaypoint()
+    {
+        if (_waypoints == null || _waypoints.Length == 0)
         {
-            Vector2 dir = waypoints[currentWaypointIndex].position - transform.position;
+            return Mathf.Infinity;
+        }
+
+        if (_currentWaypointIndex < _waypoints.Length)
+        {
+            return Vector2.Distance(transform.position, _waypoints[_currentWaypointIndex].position);
+        }
+
+        return 0f;
+    }
+
+    private void Move()
+    {
+        transform.position = Vector2.MoveTowards(transform.position, _waypoints[_currentWaypointIndex].position, speed * Time.deltaTime);
+
+        if (Vector2.Distance(transform.position, _waypoints[_currentWaypointIndex].position) < 0.05f)
+        {
+            Vector2 dir = _waypoints[_currentWaypointIndex].position - transform.position;
+
             if (dir.magnitude > 0.1f)
             {
                 float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
                 transform.rotation = Quaternion.Euler(0, 0, angle);
             }
 
-            currentWaypointIndex++;
+            _currentWaypointIndex++;
         }
 
-        if (currentWaypointIndex == waypoints.Length)
+        if (_currentWaypointIndex == _waypoints.Length)
         {
             if (BaseHealth.instance != null)
             {
@@ -83,17 +103,24 @@ public class WaypointFollower : MonoBehaviour
                 }
             }
 
-            Destroy(gameObject);
+            NetworkServer.Destroy(gameObject);
             return;
         }
     }
 
-    void RotateTowardsTarget()
+    private void RotateTowardsTarget()
     {
-        if (currentWaypointIndex >= waypoints.Length) return;
+        if (_currentWaypointIndex >= _waypoints.Length)
+        {
+            return;
+        }
 
-        Vector2 direction = waypoints[currentWaypointIndex].position - transform.position;
-        if (direction.magnitude < 0.1f) return;
+        Vector2 direction = _waypoints[_currentWaypointIndex].position - transform.position;
+
+        if (direction.magnitude < 0.1f)
+        {
+            return;
+        }
 
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
         Quaternion targetRotation = Quaternion.Euler(0, 0, angle);

@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Mirror;
 
 [System.Serializable]
 public class EnemySubWave
@@ -17,7 +18,7 @@ public class Wave
     public List<EnemySubWave> enemyGroups;
 }
 
-public class Spawner : MonoBehaviour
+public class Spawner : NetworkBehaviour
 {
     [SerializeField] private Wave[] waves;
     [SerializeField] private float timeBetweenWaves = 5f;
@@ -34,20 +35,27 @@ public class Spawner : MonoBehaviour
     [Header("Music Settings")]
     public AudioSource backgroundMusic;
 
-    private AudioSource audioSource;
+    private AudioSource _audioSource;
     [HideInInspector] public int currentWaveIndex = 0;
 
     void Awake()
     {
-        audioSource = gameObject.AddComponent<AudioSource>();
-        audioSource.playOnAwake = false;
-        audioSource.spatialBlend = 0f;
+        _audioSource = gameObject.AddComponent<AudioSource>();
+        _audioSource.playOnAwake = false;
+        _audioSource.spatialBlend = 0f;
     }
 
     void Start()
     {
         if (backgroundMusic != null)
+        {
             backgroundMusic.Stop();
+        }
+
+        if (!isServer)
+        {
+            return;
+        }
 
         StartCoroutine(SpawnAllWaves());
     }
@@ -60,36 +68,22 @@ public class Spawner : MonoBehaviour
 
         while (countdown > 0)
         {
-            waveDisplay.UpdateDisplay(Mathf.CeilToInt(countdown));
-            waveDisplay.SetColor(countdownColor);
-
-            if (tickSound != null)
-            {
-                audioSource.PlayOneShot(tickSound);
-            }
+            RpcUpdateWaveUI(Mathf.CeilToInt(countdown), countdownColor);
+            RpcPlayTickSound();
 
             yield return new WaitForSeconds(1f);
             countdown--;
         }
 
-        waveDisplay.SetColor(waveColor);
-        waveDisplay.UpdateDisplay(0);
-
-        if (startWaveSound != null)
-        {
-            audioSource.PlayOneShot(startWaveSound);
-        }
-
-        if (backgroundMusic != null)
-        {
-            backgroundMusic.Play();
-        }
+        RpcUpdateWaveUI(0, waveColor);
+        RpcPlayStartWaveSound();
+        RpcPlayBackgroundMusic();
 
         yield return new WaitForSeconds(0.5f);
 
         while (currentWaveIndex < waves.Length)
         {
-            waveDisplay.UpdateDisplay(currentWaveIndex + 1);
+            RpcUpdateWaveUI(currentWaveIndex + 1, waveColor);
 
             Wave currentWave = waves[currentWaveIndex];
 
@@ -97,7 +91,10 @@ public class Spawner : MonoBehaviour
             {
                 for (int i = 0; i < group.count; i++)
                 {
-                    Instantiate(group.enemyPrefab, transform.position, Quaternion.identity);
+                    GameObject enemy = Instantiate(group.enemyPrefab, transform.position, Quaternion.identity);
+
+                    NetworkServer.Spawn(enemy);
+
                     yield return new WaitForSeconds(group.rate);
                 }
             }
@@ -118,6 +115,43 @@ public class Spawner : MonoBehaviour
         if (GameManager.instance != null)
         {
             GameManager.instance.WinLevel();
+        }
+    }
+
+    [ClientRpc]
+    private void RpcUpdateWaveUI(int displayValue, Color color)
+    {
+        if (waveDisplay != null)
+        {
+            waveDisplay.SetColor(color);
+            waveDisplay.UpdateDisplay(displayValue);
+        }
+    }
+
+    [ClientRpc]
+    private void RpcPlayTickSound()
+    {
+        if (tickSound != null && _audioSource != null)
+        {
+            _audioSource.PlayOneShot(tickSound);
+        }
+    }
+
+    [ClientRpc]
+    private void RpcPlayStartWaveSound()
+    {
+        if (startWaveSound != null && _audioSource != null)
+        {
+            _audioSource.PlayOneShot(startWaveSound);
+        }
+    }
+
+    [ClientRpc]
+    private void RpcPlayBackgroundMusic()
+    {
+        if (backgroundMusic != null && !backgroundMusic.isPlaying)
+        {
+            backgroundMusic.Play();
         }
     }
 }
