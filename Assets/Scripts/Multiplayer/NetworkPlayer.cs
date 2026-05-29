@@ -13,21 +13,48 @@ public class NetworkPlayer : NetworkBehaviour
     [Command]
     public void CmdBuildTurret(Vector3 nodePos, string turretType)
     {
-        Node[] allNodes = FindObjectsByType<Node>(FindObjectsSortMode.None);
-        Node targetNode = null;
-
-        foreach (Node n in allNodes)
-        {
-            if (Vector3.Distance(n.transform.position, nodePos) < 0.1f)
-            {
-                targetNode = n;
-                break;
-            }
-        }
+        Node targetNode = FindNode(nodePos);
 
         if (targetNode != null)
         {
             BuildManager.instance.ServerBuildTurret(targetNode, turretType);
         }
+    }
+
+    [Command]
+    public void CmdUpgradeTurret(Vector3 nodePos)
+    {
+        Node targetNode = FindNode(nodePos);
+
+        if (targetNode != null)
+        {
+            targetNode.ServerUpgradeTurret();
+        }
+    }
+
+    [Command]
+    public void CmdSellTurret(Vector3 nodePos)
+    {
+        Node targetNode = FindNode(nodePos);
+
+        if (targetNode != null)
+        {
+            targetNode.ServerSellTurret();
+        }
+    }
+
+    private Node FindNode(Vector3 pos)
+    {
+        Node[] allNodes = FindObjectsByType<Node>(FindObjectsSortMode.None);
+
+        foreach (Node n in allNodes)
+        {
+            if (Vector3.Distance(n.transform.position, pos) < 0.1f)
+            {
+                return n;
+            }
+        }
+
+        return null;
     }
 }

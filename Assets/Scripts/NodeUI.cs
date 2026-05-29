@@ -88,7 +88,7 @@ public class NodeUI : MonoBehaviour
     {
         if (targetNode != null)
         {
-            targetNode.UpgradeTurretOnNode();
+            targetNode.RequestUpgrade();
             Hide();
         }
     }
@@ -97,7 +97,7 @@ public class NodeUI : MonoBehaviour
     {
         if (targetNode != null)
         {
-            targetNode.SellTurretOnNode();
+            targetNode.RequestSell();
             Hide();
         }
     }

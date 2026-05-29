@@ -1,25 +1,22 @@
 using UnityEngine;
 using System.Collections;
 using UnityEngine.InputSystem;
+using Mirror;
 
-public class Turret : MonoBehaviour
+public class Turret : NetworkBehaviour
 {
     [Header("Attributes")]
-    private float range;
-    private int damage;
-    private float fireRate;
-    private float fireCountdown = 0f;
     [SerializeField] private float rotationSpeed = 10f;
 
     [Header("Setup Fields")]
     [SerializeField] private Transform partToRotate;
-    [SerializeField] private string enemyTag = "Enemy";
 
     [Header("Hitscan & Visuals")]
     [SerializeField] private GameObject[] muzzleFlashObjs;
     [SerializeField] private float flashDuration = 0.05f;
 
     [Header("Upgrade System")]
+    [SyncVar(hook = nameof(OnLevelChanged))]
     [SerializeField] private int currentLevel = 1;
 
     [SerializeField] private GameObject visualLevel1;
@@ -37,46 +34,78 @@ public class Turret : MonoBehaviour
     public int upgradeCostLvl2 = 50;
     public int upgradeCostLvl3 = 100;
 
-    private Transform target;
+    private float _range;
+    private int _damage;
+    private float _fireRate;
+    private float _fireCountdown = 0f;
+
+    [SyncVar] private GameObject _syncedTarget;
 
     void Start()
     {
-        InvokeRepeating("UpdateTarget", 0f, 0.5f);
         SetLevelStats();
         SetupLevelVisuals();
         DeactivateMuzzleFlashes();
-    }
 
-    void SetLevelStats()
-    {
-        switch (currentLevel)
+        if (isServer)
         {
-            case 1:
-                damage = 10;
-                fireRate = 1f;
-                range = 5f;
-                break;
-            case 2:
-                damage = 15;
-                fireRate = 1.8f;
-                range = 6f;
-                break;
-            case 3:
-                damage = 5;
-                fireRate = 5f;
-                range = 7.5f;
-                break;
+            InvokeRepeating("UpdateTarget", 0f, 0.5f);
         }
+
+        LinkToNode();
     }
 
-    void SetupLevelVisuals()
+    void Update()
     {
-        if (visualLevel1 != null) visualLevel1.SetActive(currentLevel == 1);
-        if (visualLevel2 != null) visualLevel2.SetActive(currentLevel == 2);
-        if (visualLevel3 != null) visualLevel3.SetActive(currentLevel == 3);
+        if (_syncedTarget != null)
+        {
+            LockOnTarget();
+        }
+
+        if (!isServer)
+        {
+            return;
+        }
+
+        if (_syncedTarget == null)
+        {
+            return;
+        }
+
+        if (_fireCountdown <= 0f)
+        {
+            Shoot();
+            _fireCountdown = 1f / _fireRate;
+        }
+
+        _fireCountdown -= Time.deltaTime;
     }
 
-    void UpdateTarget()
+    void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, _range);
+    }
+
+    [Server]
+    public void UpgradeTower()
+    {
+        if (currentLevel >= 3)
+        {
+            return;
+        }
+
+        currentLevel++;
+        SetLevelStats();
+    }
+
+    public int GetCurrentLevel()
+    {
+        return currentLevel;
+    }
+
+    [Server]
+    private void UpdateTarget()
     {
         EnemyHealth bestTarget = null;
         int maxWaypoint = -1;
@@ -86,9 +115,10 @@ public class Turret : MonoBehaviour
         {
             float distanceToEnemy = Vector2.Distance(transform.position, enemy.transform.position);
 
-            if (distanceToEnemy <= range)
+            if (distanceToEnemy <= _range)
             {
                 WaypointFollower follower = enemy.GetComponent<WaypointFollower>();
+
                 if (follower != null)
                 {
                     int enemyWaypoint = follower.GetWaypointIndex();
@@ -104,44 +134,33 @@ public class Turret : MonoBehaviour
             }
         }
 
-        target = (bestTarget != null) ? bestTarget.transform : null;
+        _syncedTarget = (bestTarget != null) ? bestTarget.gameObject : null;
     }
 
-    void Update()
+    private void LockOnTarget()
     {
-        if (target == null) return;
-
-        LockOnTarget();
-
-        if (fireCountdown <= 0f)
-        {
-            Shoot();
-            fireCountdown = 1f / fireRate;
-        }
-        fireCountdown -= Time.deltaTime;
-
-        if (Keyboard.current.uKey.wasPressedThisFrame)
-        {
-            UpgradeTower();
-        }
-    }
-
-    void LockOnTarget()
-    {
-        Vector2 dir = target.position - transform.position;
+        Vector2 dir = _syncedTarget.transform.position - transform.position;
         float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
         Quaternion lookRotation = Quaternion.Euler(0, 0, angle);
         partToRotate.rotation = Quaternion.Lerp(partToRotate.rotation, lookRotation, Time.deltaTime * rotationSpeed);
     }
 
-    void Shoot()
+    [Server]
+    private void Shoot()
     {
-        EnemyHealth enemy = target.GetComponent<EnemyHealth>();
+        EnemyHealth enemy = _syncedTarget.GetComponent<EnemyHealth>();
+
         if (enemy != null)
         {
-            enemy.TakeDamage(damage);
+            enemy.TakeDamage(_damage);
         }
 
+        RpcPlayShootEffects(currentLevel);
+    }
+
+    [ClientRpc]
+    private void RpcPlayShootEffects(int level)
+    {
         if (muzzleFlashObjs != null)
         {
             StartCoroutine(FlashEffects());
@@ -151,10 +170,13 @@ public class Turret : MonoBehaviour
         {
             AudioClip clipToPlay = shootSoundLevel1;
 
-            switch (currentLevel)
+            if (level == 2)
             {
-                case 2: clipToPlay = shootSoundLevel2; break;
-                case 3: clipToPlay = shootSoundLevel3; break;
+                clipToPlay = shootSoundLevel2;
+            }
+            else if (level == 3)
+            {
+                clipToPlay = shootSoundLevel3;
             }
 
             if (clipToPlay != null)
@@ -164,49 +186,100 @@ public class Turret : MonoBehaviour
         }
     }
 
-    IEnumerator FlashEffects()
+    private void SetLevelStats()
+    {
+        if (currentLevel == 1)
+        {
+            _damage = 10;
+            _fireRate = 1f;
+            _range = 5f;
+        }
+        else if (currentLevel == 2)
+        {
+            _damage = 15;
+            _fireRate = 1.8f;
+            _range = 6f;
+        }
+        else if (currentLevel == 3)
+        {
+            _damage = 5;
+            _fireRate = 5f;
+            _range = 7.5f;
+        }
+    }
+
+    private void SetupLevelVisuals()
+    {
+        if (visualLevel1 != null)
+        {
+            visualLevel1.SetActive(currentLevel == 1);
+        }
+
+        if (visualLevel2 != null)
+        {
+            visualLevel2.SetActive(currentLevel == 2);
+        }
+
+        if (visualLevel3 != null)
+        {
+            visualLevel3.SetActive(currentLevel == 3);
+        }
+    }
+
+    private void OnLevelChanged(int oldLevel, int newLevel)
+    {
+        SetupLevelVisuals();
+        DeactivateMuzzleFlashes();
+    }
+
+    private void DeactivateMuzzleFlashes()
+    {
+        if (muzzleFlashObjs == null)
+        {
+            return;
+        }
+
+        foreach (GameObject flash in muzzleFlashObjs)
+        {
+            if (flash != null)
+            {
+                flash.SetActive(false);
+            }
+        }
+    }
+
+    private IEnumerator FlashEffects()
     {
         foreach (GameObject flash in muzzleFlashObjs)
         {
-            if (flash != null) flash.SetActive(true);
+            if (flash != null)
+            {
+                flash.SetActive(true);
+            }
         }
 
         yield return new WaitForSeconds(flashDuration);
 
         foreach (GameObject flash in muzzleFlashObjs)
         {
-            if (flash != null) flash.SetActive(false);
+            if (flash != null)
+            {
+                flash.SetActive(false);
+            }
         }
     }
 
-    public void UpgradeTower()
+    private void LinkToNode()
     {
-        if (currentLevel >= 3) return;
+        Node[] allNodes = FindObjectsByType<Node>(FindObjectsSortMode.None);
 
-        currentLevel++;
-
-        SetLevelStats();
-        SetupLevelVisuals();
-        DeactivateMuzzleFlashes();
-    }
-
-    public int GetCurrentLevel()
-    {
-        return currentLevel;
-    }
-
-    void OnDrawGizmosSelected()
-    {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, range);
-    }
-
-    void DeactivateMuzzleFlashes()
-    {
-        if (muzzleFlashObjs == null) return;
-        foreach (GameObject flash in muzzleFlashObjs)
+        foreach (Node n in allNodes)
         {
-            if (flash != null) flash.SetActive(false);
+            if (Vector3.Distance(n.transform.position, transform.position) < 0.1f)
+            {
+                n.turret = this.gameObject;
+                break;
+            }
         }
     }
 }

@@ -2,11 +2,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using Mirror;
 
 public class Node : MonoBehaviour, IPointerClickHandler
 {
     public GameObject turret;
-    private int totalMoneyInvested;
 
     public void OnPointerClick(PointerEventData eventData)
     {
@@ -22,7 +22,6 @@ public class Node : MonoBehaviour, IPointerClickHandler
         }
 
         List<RaycastResult> results = new List<RaycastResult>();
-
         EventSystem.current.RaycastAll(eventDataCurrentPosition, results);
 
         foreach (RaycastResult result in results)
@@ -38,7 +37,10 @@ public class Node : MonoBehaviour, IPointerClickHandler
 
         if (turret != null)
         {
-            if (ShopUI.instance != null) ShopUI.instance.Hide();
+            if (ShopUI.instance != null)
+            {
+                ShopUI.instance.Hide();
+            }
 
             if (NodeUI.instance != null)
             {
@@ -61,49 +63,106 @@ public class Node : MonoBehaviour, IPointerClickHandler
     public void SetTurret(GameObject _turret, int price)
     {
         turret = _turret;
-        totalMoneyInvested = price;
     }
 
-    public void UpgradeTurretOnNode()
+    public void RequestUpgrade()
     {
-        if (turret == null) return;
+        if (NetworkPlayer.LocalPlayer != null)
+        {
+            NetworkPlayer.LocalPlayer.CmdUpgradeTurret(transform.position);
+        }
+    }
+
+    public void RequestSell()
+    {
+        if (NetworkPlayer.LocalPlayer != null)
+        {
+            NetworkPlayer.LocalPlayer.CmdSellTurret(transform.position);
+        }
+    }
+
+    public void ServerUpgradeTurret()
+    {
+        if (turret == null)
+        {
+            return;
+        }
 
         int cost = GetUpgradeCost();
-        if (cost <= 0) return;
+
+        if (cost <= 0)
+        {
+            return;
+        }
 
         if (CurrencyManager.instance.TrySpendMoney(cost))
         {
             Turret t = turret.GetComponent<Turret>();
             MissileTurret mt = turret.GetComponent<MissileTurret>();
 
-            if (t != null) t.UpgradeTower();
-            if (mt != null) mt.UpgradeTower();
+            if (t != null)
+            {
+                t.UpgradeTower();
+            }
+            if (mt != null)
+            {
+                mt.UpgradeTower();
+            }
 
-            totalMoneyInvested += cost;
             BuildManager.instance.PlayBuildSound("upgrade");
         }
     }
 
-    public void SellTurretOnNode()
+    public void ServerSellTurret()
     {
-        if (turret == null) return;
+        if (turret == null)
+        {
+            return;
+        }
 
         CurrencyManager.instance.AddMoney(GetSellAmount());
         BuildManager.instance.PlayBuildSound("sell");
 
-        Destroy(turret);
+        NetworkServer.Destroy(turret);
         turret = null;
-        totalMoneyInvested = 0;
     }
 
     public int GetSellAmount()
     {
-        return Mathf.RoundToInt(totalMoneyInvested * 0.5f);
+        if (turret == null)
+        {
+            return 0;
+        }
+
+        Turret t = turret.GetComponent<Turret>();
+        if (t != null)
+        {
+            int invested = BuildManager.instance.standardTurretPrice;
+            if (t.GetCurrentLevel() >= 2) invested += t.upgradeCostLvl2;
+            if (t.GetCurrentLevel() >= 3) invested += t.upgradeCostLvl3;
+
+            return Mathf.RoundToInt(invested * 0.5f);
+        }
+
+        MissileTurret mt = turret.GetComponent<MissileTurret>();
+        if (mt != null)
+        {
+            int invested = BuildManager.instance.missileTurretPrice;
+            if (mt.GetCurrentLevel() >= 2) invested += mt.upgradeCostLvl2;
+            if (mt.GetCurrentLevel() >= 3) invested += mt.upgradeCostLvl3;
+
+            return Mathf.RoundToInt(invested * 0.5f);
+        }
+
+        return 0;
     }
 
     public int GetUpgradeCost()
     {
-        if (turret == null) return 0;
+        if (turret == null)
+        {
+            return 0;
+        }
 
         Turret t = turret.GetComponent<Turret>();
         MissileTurret mt = turret.GetComponent<MissileTurret>();
