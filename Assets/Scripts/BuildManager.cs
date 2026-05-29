@@ -37,6 +37,11 @@ public class BuildManager : NetworkBehaviour
     [Server]
     public void ServerBuildTurret(Node node, string type)
     {
+        if (node.turret != null)
+        {
+            return;
+        }
+
         GameObject turretToBuild = null;
         int price = 0;
 
