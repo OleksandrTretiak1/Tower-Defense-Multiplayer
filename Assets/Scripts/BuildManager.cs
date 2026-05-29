@@ -1,7 +1,7 @@
 using UnityEngine;
 using Mirror;
 
-public class BuildManager : MonoBehaviour
+public class BuildManager : NetworkBehaviour
 {
     public static BuildManager instance;
 
@@ -34,6 +34,7 @@ public class BuildManager : MonoBehaviour
         }
     }
 
+    [Server]
     public void ServerBuildTurret(Node node, string type)
     {
         GameObject turretToBuild = null;
@@ -58,11 +59,12 @@ public class BuildManager : MonoBehaviour
 
             NetworkServer.Spawn(turret);
 
-            PlayBuildSound("build");
+            RpcPlayBuildSound("build");
         }
     }
 
-    public void PlayBuildSound(string type)
+    [ClientRpc]
+    public void RpcPlayBuildSound(string type)
     {
         AudioClip clipToPlay = null;
 

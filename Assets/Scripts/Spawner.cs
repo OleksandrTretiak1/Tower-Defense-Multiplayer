@@ -36,7 +36,7 @@ public class Spawner : NetworkBehaviour
     public AudioSource backgroundMusic;
 
     private AudioSource _audioSource;
-    [HideInInspector] public int currentWaveIndex = 0;
+    [HideInInspector] [SyncVar] public int currentWaveIndex = 0;
 
     void Awake()
     {

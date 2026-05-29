@@ -3,14 +3,17 @@ using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using Mirror;
 
-public class BaseHealth : MonoBehaviour
+public class BaseHealth : NetworkBehaviour
 {
     public static BaseHealth instance;
 
     [Header("Health Settings")]
     [SerializeField] private float maxHealth = 100f;
-    private float currentHealth;
+
+    [SyncVar(hook = nameof(OnHealthChanged))]
+    private float _currentHealth;
 
     [Header("UI Elements")]
     [SerializeField] private TextMeshProUGUI healthText;
@@ -18,67 +21,82 @@ public class BaseHealth : MonoBehaviour
 
     [Header("Audio")]
     [SerializeField] private AudioClip damageSound;
-    private AudioSource audioSource;
     [SerializeField] private AudioClip gameOverSound;
+
+    private AudioSource _audioSource;
 
     void Awake()
     {
         if (instance == null) instance = this;
-        currentHealth = maxHealth;
+        _audioSource = GetComponentInChildren<AudioSource>();
+    }
 
-        audioSource = GetComponentInChildren<AudioSource>();
+    public override void OnStartServer()
+    {
+        _currentHealth = maxHealth;
     }
 
     void Start()
     {
-        UpdateUI();
+        UpdateUI(_currentHealth);
     }
 
+    [Server]
     public void TakeDamage(float amount)
     {
-        currentHealth -= amount;
-        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
+        _currentHealth -= amount;
+        _currentHealth = Mathf.Clamp(_currentHealth, 0, maxHealth);
+    }
 
-        if (damageSound != null && audioSource != null)
+    public void PlayFinalSound(AudioClip clip)
+    {
+        if (clip != null && _audioSource != null)
         {
-            audioSource.PlayOneShot(damageSound);
+            _audioSource.PlayOneShot(clip);
+        }
+    }
+
+    private void OnHealthChanged(float oldHealth, float newHealth)
+    {
+        UpdateUI(newHealth);
+
+        if (newHealth < oldHealth && newHealth > 0)
+        {
+            if (damageSound != null && _audioSource != null)
+            {
+                _audioSource.PlayOneShot(damageSound);
+            }
         }
 
-        UpdateUI();
-
-        if (currentHealth <= 0)
+        if (newHealth <= 0 && oldHealth > 0)
         {
             GameOver();
         }
     }
 
-    void UpdateUI()
+    private void UpdateUI(float currentVal)
     {
         if (healthText != null)
-            healthText.text = currentHealth + "/" + maxHealth;
+        {
+            healthText.text = currentVal + "/" + maxHealth;
+        }
 
         if (healthBarFill != null)
-            healthBarFill.fillAmount = currentHealth / maxHealth;
+        {
+            healthBarFill.fillAmount = currentVal / maxHealth;
+        }
     }
 
-    void GameOver()
+    private void GameOver()
     {
-        if (gameOverSound != null && audioSource != null)
+        if (gameOverSound != null && _audioSource != null)
         {
-            audioSource.PlayOneShot(gameOverSound);
+            _audioSource.PlayOneShot(gameOverSound);
         }
 
         if (GameManager.instance != null)
         {
             GameManager.instance.ShowGameOver();
-        }
-    }
-
-    public void PlayFinalSound(AudioClip clip)
-    {
-        if (clip != null && audioSource != null)
-        {
-            audioSource.PlayOneShot(clip);
         }
     }
 }

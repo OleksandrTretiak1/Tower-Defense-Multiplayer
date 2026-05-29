@@ -109,7 +109,7 @@ public class Node : MonoBehaviour, IPointerClickHandler
                 mt.UpgradeTower();
             }
 
-            BuildManager.instance.PlayBuildSound("upgrade");
+            BuildManager.instance.RpcPlayBuildSound("upgrade");
         }
     }
 
@@ -121,7 +121,7 @@ public class Node : MonoBehaviour, IPointerClickHandler
         }
 
         CurrencyManager.instance.AddMoney(GetSellAmount());
-        BuildManager.instance.PlayBuildSound("sell");
+        BuildManager.instance.RpcPlayBuildSound("sell");
 
         NetworkServer.Destroy(turret);
         turret = null;

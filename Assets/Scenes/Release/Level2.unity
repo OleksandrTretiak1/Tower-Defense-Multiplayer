@@ -14397,6 +14397,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1614520349}
   - component: {fileID: 1614520350}
+  - component: {fileID: 1614520351}
   m_Layer: 0
   m_Name: End
   m_TagString: Untagged
@@ -14432,11 +14433,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3584e92cee2c5714ab9815b43a872d9d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BaseHealth
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   maxHealth: 100
   healthText: {fileID: 1178163346}
   healthBarFill: {fileID: 1078929244}
   damageSound: {fileID: 8300000, guid: 80e397195ea2940b69ee7bdbded856a5, type: 3}
   gameOverSound: {fileID: 8300000, guid: ef4bcb6765efc45c59e5f2e4e88dcab3, type: 3}
+--- !u!114 &1614520351
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1614520348}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Mirror::Mirror.NetworkIdentity
+  sceneId: 2228030245
+  _assetId: 0
+  serverOnly: 0
+  visibility: 0
+  hasSpawned: 0
 --- !u!1 &1636834330
 GameObject:
   m_ObjectHideFlags: 0
@@ -15279,6 +15300,7 @@ GameObject:
   - component: {fileID: 1725371396}
   - component: {fileID: 1725371397}
   - component: {fileID: 1725371398}
+  - component: {fileID: 1725371399}
   m_Layer: 0
   m_Name: Managers
   m_TagString: Untagged
@@ -15347,6 +15369,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8fa53898b1692714dae96ed82f0c83d3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   pauseMenu: {fileID: 84608380}
   gameOverMenu: {fileID: 1352089523}
   spawner: {fileID: 101824571}
@@ -15368,6 +15393,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 75c823322e941904fa7c21bddac5d053, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SettingsLoader
+--- !u!114 &1725371399
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1725371393}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Mirror::Mirror.NetworkIdentity
+  sceneId: 1890568366
+  _assetId: 0
+  serverOnly: 0
+  visibility: 0
+  hasSpawned: 0
 --- !u!1001 &1754989619
 PrefabInstance:
   m_ObjectHideFlags: 0
