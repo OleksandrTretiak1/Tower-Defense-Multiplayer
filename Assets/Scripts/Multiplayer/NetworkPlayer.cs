@@ -43,6 +43,15 @@ public class NetworkPlayer : NetworkBehaviour
         }
     }
 
+    [Command]
+    public void CmdRestartGame()
+    {
+        if (GameManager.instance != null)
+        {
+            GameManager.instance.ServerRestartGame();
+        }
+    }
+
     private Node FindNode(Vector3 pos)
     {
         Node[] allNodes = FindObjectsByType<Node>(FindObjectsSortMode.None);

@@ -55,7 +55,7 @@ public class GameManager : NetworkBehaviour
     public void ShowGameOver()
     {
         _isGameOver = true;
-        Time.timeScale = 0f;
+        SetTimeScale();
 
         if (resultTitleText != null)
         {
@@ -76,15 +76,12 @@ public class GameManager : NetworkBehaviour
 
     public void TogglePause()
     {
-        if (_isGameOver)
-        {
-            return;
-        }
+        if (_isGameOver) return;
 
         _isPaused = !_isPaused;
         pauseMenu.SetActive(_isPaused);
 
-        Time.timeScale = _isPaused ? 0f : 1f;
+        SetTimeScale();
     }
 
     public void OnPauseButtonPressed() => TogglePause();
@@ -107,13 +104,43 @@ public class GameManager : NetworkBehaviour
     public void Restart()
     {
         Time.timeScale = 1f;
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+
+        if (NetworkServer.active)
+        {
+            ServerRestartGame();
+        }
+        else if (NetworkClient.active && NetworkPlayer.LocalPlayer != null)
+        {
+            NetworkPlayer.LocalPlayer.CmdRestartGame();
+        }
+        else
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        }
+    }
+
+    [Server]
+    public void ServerRestartGame()
+    {
+        NetworkManager.singleton.ServerChangeScene(SceneManager.GetActiveScene().name);
     }
 
     public void GoToMainMenu()
     {
         Time.timeScale = 1f;
-        SceneManager.LoadScene("MainMenu");
+
+        if (NetworkServer.active)
+        {
+            NetworkManager.singleton.StopHost();
+        }
+        else if (NetworkClient.active)
+        {
+            NetworkManager.singleton.StopClient();
+        }
+        else
+        {
+            SceneManager.LoadScene("MainMenu");
+        }
     }
 
     [ClientRpc]
@@ -133,7 +160,7 @@ public class GameManager : NetworkBehaviour
             BaseHealth.instance.PlayFinalSound(winSound);
         }
 
-        Time.timeScale = 0f;
+        SetTimeScale();
 
         if (resultTitleText != null)
         {
@@ -159,15 +186,39 @@ public class GameManager : NetworkBehaviour
                 PlayerPrefs.Save();
             }
 
-            if (currentWaveText != null)
-            {
-                currentWaveText.text = "Waves: " + currentWave;
-            }
+            if (currentWaveText != null) currentWaveText.text = "Waves: " + currentWave;
+            if (highscoreText != null) highscoreText.text = "Best: " + savedHighscore;
+        }
+    }
 
-            if (highscoreText != null)
+    private void SetTimeScale()
+    {
+        if (_isGameOver)
+        {
+            Time.timeScale = 0f;
+            return;
+        }
+
+        if (NetworkClient.active && !NetworkServer.active)
+        {
+            Time.timeScale = 1f;
+            return;
+        }
+
+        if (NetworkServer.active)
+        {
+            if (NetworkServer.connections.Count > 1)
             {
-                highscoreText.text = "Best: " + savedHighscore;
+                Time.timeScale = 1f;
             }
+            else
+            {
+                Time.timeScale = (_isPaused || _isGameOver) ? 0f : 1f;
+            }
+        }
+        else
+        {
+            Time.timeScale = (_isPaused || _isGameOver) ? 0f : 1f;
         }
     }
 }

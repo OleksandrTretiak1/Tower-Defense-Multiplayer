@@ -84,7 +84,11 @@ public class LobbyManager : MonoBehaviour
 
     public void LoadLevel(string sceneName)
     {
-        SceneManager.LoadScene(sceneName);
+        NetworkManager.singleton.maxConnections = 1;
+
+        NetworkManager.singleton.onlineScene = sceneName;
+
+        NetworkManager.singleton.StartHost();
     }
 
     public void ResetProgress()
@@ -111,6 +115,10 @@ public class LobbyManager : MonoBehaviour
         MultiplayerButtonsPanel.SetActive(false);
         HostInterfacePanel.SetActive(true);
 
+        NetworkManager.singleton.maxConnections = 2;
+
+        NetworkManager.singleton.onlineScene = "";
+
         NetworkManager.singleton.StartHost();
         _isWaitingForPlayer = true;
 
@@ -135,6 +143,7 @@ public class LobbyManager : MonoBehaviour
             ipAddress = "localhost";
         }
 
+        NetworkManager.singleton.onlineScene = "WAIT_FOR_LEVEL";
         NetworkManager.singleton.networkAddress = ipAddress;
         NetworkManager.singleton.StartClient();
     }

@@ -7633,6 +7633,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2786838972487401078, guid: 3161ac1f02894354d8d64cc54abaec9a, type: 3}
+      propertyPath: offlineScene
+      value: Assets/Scenes/Release/MainMenu.unity
+      objectReference: {fileID: 0}
+    - target: {fileID: 2786838972487401078, guid: 3161ac1f02894354d8d64cc54abaec9a, type: 3}
       propertyPath: spawnPrefabs.Array.size
       value: 6
       objectReference: {fileID: 0}
