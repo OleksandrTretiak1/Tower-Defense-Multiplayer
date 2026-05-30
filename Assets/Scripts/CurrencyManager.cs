@@ -1,13 +1,16 @@
 using UnityEngine;
 using TMPro;
+using Mirror;
 
-public class CurrencyManager : MonoBehaviour
+public class CurrencyManager : NetworkBehaviour
 {
     public static CurrencyManager instance;
 
     [Header("Settings")]
     [SerializeField] private int startingMoney = 200;
-    private int currentMoney;
+
+    [SyncVar(hook = nameof(OnMoneyChanged))]
+    private int _currentMoney;
 
     [Header("UI")]
     [SerializeField] private SpriteNumberDisplay moneyVisual;
@@ -15,37 +18,45 @@ public class CurrencyManager : MonoBehaviour
     void Awake()
     {
         if (instance == null) instance = this;
-        currentMoney = startingMoney;
+    }
+
+    public override void OnStartServer()
+    {
+        _currentMoney = startingMoney;
     }
 
     void Start()
     {
-        UpdateUI();
+        UpdateUI(_currentMoney);
     }
 
+    [Server]
     public void AddMoney(int amount)
     {
-        currentMoney += amount;
-        UpdateUI();
+        _currentMoney += amount;
     }
 
+    [Server]
     public bool TrySpendMoney(int amount)
     {
-        if (currentMoney >= amount)
+        if (_currentMoney >= amount)
         {
-            currentMoney -= amount;
-            UpdateUI();
+            _currentMoney -= amount;
             return true;
         }
-
         return false;
     }
 
-    void UpdateUI()
+    private void OnMoneyChanged(int oldMoney, int newMoney)
+    {
+        UpdateUI(newMoney);
+    }
+
+    private void UpdateUI(int currentAmount)
     {
         if (moneyVisual != null)
         {
-            moneyVisual.UpdateDisplay(currentMoney);
+            moneyVisual.UpdateDisplay(currentAmount);
         }
     }
 }

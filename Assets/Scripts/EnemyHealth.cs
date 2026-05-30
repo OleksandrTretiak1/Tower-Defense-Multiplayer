@@ -47,6 +47,11 @@ public class EnemyHealth : NetworkBehaviour
     [Server]
     void Die()
     {
+        if (CurrencyManager.instance != null)
+        {
+            CurrencyManager.instance.AddMoney(moneyReward);
+        }
+
         RpcHandleDeath(transform.position);
 
         NetworkServer.Destroy(gameObject);
@@ -63,11 +68,6 @@ public class EnemyHealth : NetworkBehaviour
         if (deathSound != null)
         {
             PlaySound2D(deathSound);
-        }
-
-        if (CurrencyManager.instance != null)
-        {
-            CurrencyManager.instance.AddMoney(moneyReward);
         }
     }
 
