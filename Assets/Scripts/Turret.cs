@@ -5,6 +5,10 @@ using Mirror;
 
 public class Turret : NetworkBehaviour
 {
+    [Header("Upgrade Economics")]
+    public int upgradeCostLvl2 = 50;
+    public int upgradeCostLvl3 = 100;
+
     [Header("Attributes")]
     [SerializeField] private float rotationSpeed = 10f;
 
@@ -30,10 +34,6 @@ public class Turret : NetworkBehaviour
     [Header("Audio Settings")]
     [SerializeField] private AudioSource shootingAudioSource;
 
-    [Header("Upgrade Economics")]
-    public int upgradeCostLvl2 = 50;
-    public int upgradeCostLvl3 = 100;
-
     private float _range;
     private int _damage;
     private float _fireRate;
@@ -41,7 +41,7 @@ public class Turret : NetworkBehaviour
 
     [SyncVar] private GameObject _syncedTarget;
 
-    void Start()
+    private void Start()
     {
         SetLevelStats();
         SetupLevelVisuals();
@@ -49,13 +49,13 @@ public class Turret : NetworkBehaviour
 
         if (isServer)
         {
-            InvokeRepeating("UpdateTarget", 0f, 0.5f);
+            InvokeRepeating(nameof(UpdateTarget), 0f, 0.5f);
         }
 
         LinkToNode();
     }
 
-    void Update()
+    private void Update()
     {
         if (_syncedTarget != null)
         {
@@ -81,7 +81,7 @@ public class Turret : NetworkBehaviour
         _fireCountdown -= Time.deltaTime;
     }
 
-    void OnDrawGizmosSelected()
+    private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, _range);

@@ -2,29 +2,29 @@ using UnityEngine;
 
 public class SafeAreaHandler : MonoBehaviour
 {
-    RectTransform rectTransform;
-    Rect lastSafeArea = Rect.zero;
-    Vector2 lastScreenSize = Vector2.zero;
+    private RectTransform _rectTransform;
+    private Rect _lastSafeArea = Rect.zero;
+    private Vector2 _lastScreenSize = Vector2.zero;
 
-    void Awake()
+    private void Awake()
     {
-        rectTransform = GetComponent<RectTransform>();
+        _rectTransform = GetComponent<RectTransform>();
         Refresh();
     }
 
-    void Update()
+    private void Update()
     {
-        if (lastSafeArea != Screen.safeArea || lastScreenSize.x != Screen.width || lastScreenSize.y != Screen.height)
+        if (_lastSafeArea != Screen.safeArea || _lastScreenSize.x != Screen.width || _lastScreenSize.y != Screen.height)
         {
             Refresh();
         }
     }
 
-    void Refresh()
+    private void Refresh()
     {
-        lastScreenSize.x = Screen.width;
-        lastScreenSize.y = Screen.height;
-        lastSafeArea = Screen.safeArea;
+        _lastScreenSize.x = Screen.width;
+        _lastScreenSize.y = Screen.height;
+        _lastSafeArea = Screen.safeArea;
 
         Rect safeArea = Screen.safeArea;
         Vector2 anchorMin = safeArea.position;
@@ -35,7 +35,7 @@ public class SafeAreaHandler : MonoBehaviour
         anchorMax.x /= Screen.width;
         anchorMax.y /= Screen.height;
 
-        rectTransform.anchorMin = anchorMin;
-        rectTransform.anchorMax = anchorMax;
+        _rectTransform.anchorMin = anchorMin;
+        _rectTransform.anchorMax = anchorMax;
     }
 }

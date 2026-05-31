@@ -13,7 +13,7 @@ public class Projectile : MonoBehaviour
     private Transform _target;
     private Vector3 _lastTargetPosition;
 
-    void Update()
+    private void Update()
     {
         if (_target != null)
         {
@@ -35,7 +35,7 @@ public class Projectile : MonoBehaviour
         transform.Translate(dir.normalized * distanceThisFrame, Space.World);
     }
 
-    void OnDrawGizmosSelected()
+    private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.orange;
         Gizmos.DrawWireSphere(transform.position, explosionRadius);

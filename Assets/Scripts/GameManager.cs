@@ -30,12 +30,14 @@ public class GameManager : NetworkBehaviour
 
     private AudioSource MusicSource => spawner != null ? spawner.backgroundMusic : null;
 
-    void Awake()
+    private void Awake()
     {
         if (instance == null)
         {
             instance = this;
         }
+
+        Time.timeScale = 1f;
 
         musicToggle.isOn = PlayerPrefs.GetInt("MusicEnabled", 1) == 1;
         sfxToggle.isOn = PlayerPrefs.GetInt("SfxEnabled", 1) == 1;
@@ -44,7 +46,7 @@ public class GameManager : NetworkBehaviour
         ApplySfx(sfxToggle.isOn);
     }
 
-    void Update()
+    private void Update()
     {
         if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame && !_isGameOver)
         {
@@ -76,7 +78,10 @@ public class GameManager : NetworkBehaviour
 
     public void TogglePause()
     {
-        if (_isGameOver) return;
+        if (_isGameOver)
+        {
+            return;
+        }
 
         _isPaused = !_isPaused;
         pauseMenu.SetActive(_isPaused);
@@ -122,6 +127,8 @@ public class GameManager : NetworkBehaviour
     [Server]
     public void ServerRestartGame()
     {
+        Time.timeScale = 1f;
+
         NetworkManager.singleton.ServerChangeScene(SceneManager.GetActiveScene().name);
     }
 
@@ -186,8 +193,15 @@ public class GameManager : NetworkBehaviour
                 PlayerPrefs.Save();
             }
 
-            if (currentWaveText != null) currentWaveText.text = "Waves: " + currentWave;
-            if (highscoreText != null) highscoreText.text = "Best: " + savedHighscore;
+            if (currentWaveText != null)
+            {
+                currentWaveText.text = "Waves: " + currentWave;
+            }
+
+            if (highscoreText != null)
+            {
+                highscoreText.text = "Best: " + savedHighscore;
+            }
         }
     }
 

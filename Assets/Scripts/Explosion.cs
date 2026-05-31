@@ -6,7 +6,7 @@ public class Explosion : MonoBehaviour
     [SerializeField] private float duration = 0.1f;
     [SerializeField] private AudioSource audioSource;
 
-    void Start()
+    private void Start()
     {
         if (audioSource != null && audioSource.clip != null)
         {
@@ -16,7 +16,7 @@ public class Explosion : MonoBehaviour
         StartCoroutine(DestroyAfterDelay());
     }
 
-    IEnumerator DestroyAfterDelay()
+    private IEnumerator DestroyAfterDelay()
     {
         yield return new WaitForSeconds(duration);
 

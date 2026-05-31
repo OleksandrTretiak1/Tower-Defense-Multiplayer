@@ -25,9 +25,12 @@ public class BaseHealth : NetworkBehaviour
 
     private AudioSource _audioSource;
 
-    void Awake()
+    private void Awake()
     {
-        if (instance == null) instance = this;
+        if (instance == null)
+        {
+            instance = this;
+        }
         _audioSource = GetComponentInChildren<AudioSource>();
     }
 
@@ -36,7 +39,7 @@ public class BaseHealth : NetworkBehaviour
         _currentHealth = maxHealth;
     }
 
-    void Start()
+    private void Start()
     {
         UpdateUI(_currentHealth);
     }

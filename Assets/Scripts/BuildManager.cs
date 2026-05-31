@@ -5,20 +5,20 @@ public class BuildManager : NetworkBehaviour
 {
     public static BuildManager instance;
 
-    [Header("Turret Prefabs")]
-    [SerializeField] private GameObject standardTurretPrefab;
-    [SerializeField] private GameObject missileTurretPrefab;
-
     [Header("Prices")]
     public int standardTurretPrice = 50;
     public int missileTurretPrice = 150;
+
+    [Header("Turret Prefabs")]
+    [SerializeField] private GameObject standardTurretPrefab;
+    [SerializeField] private GameObject missileTurretPrefab;
 
     [Header("Global Build Sounds")]
     [SerializeField] private AudioClip globalBuildSound;
     [SerializeField] private AudioClip globalUpgradeSound;
     [SerializeField] private AudioClip globalSellSound;
 
-    void Awake()
+    private void Awake()
     {
         if (instance == null)
         {

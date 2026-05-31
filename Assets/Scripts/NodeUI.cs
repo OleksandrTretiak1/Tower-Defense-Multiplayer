@@ -15,15 +15,18 @@ public class NodeUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI upgradeCostText;
     [SerializeField] private TextMeshProUGUI sellAmountText;
 
-    private Node targetNode;
+    private Node _targetNode;
 
-    void Awake()
+    private void Awake()
     {
-        if (instance == null) instance = this;
+        if (instance == null)
+        {
+            instance = this;
+        }
         Hide();
     }
 
-    void Update()
+    private void Update()
     {
         if (mainCanvas.activeSelf && Pointer.current.press.wasPressedThisFrame)
         {
@@ -36,7 +39,10 @@ public class NodeUI : MonoBehaviour
 
     private bool IsPointerOverUIElement()
     {
-        if (EventSystem.current.IsPointerOverGameObject()) return true;
+        if (EventSystem.current.IsPointerOverGameObject())
+        {
+            return true;
+        }
 
         if (Input.touchCount > 0)
         {
@@ -54,16 +60,16 @@ public class NodeUI : MonoBehaviour
 
     public void SetTarget(Node node)
     {
-        if (targetNode == node && mainCanvas.activeSelf)
+        if (_targetNode == node && mainCanvas.activeSelf)
         {
             Hide();
             return;
         }
 
-        targetNode = node;
+        _targetNode = node;
         transform.position = node.transform.position;
 
-        int cost = targetNode.GetUpgradeCost();
+        int cost = _targetNode.GetUpgradeCost();
         if (cost <= 0)
         {
             upgradeCostText.text = "MAX";
@@ -73,31 +79,31 @@ public class NodeUI : MonoBehaviour
             upgradeCostText.text = "$" + cost;
         }
 
-        sellAmountText.text = "$" + targetNode.GetSellAmount();
+        sellAmountText.text = "$" + _targetNode.GetSellAmount();
 
         mainCanvas.SetActive(true);
     }
 
     public void Hide()
     {
-        targetNode = null;
+        _targetNode = null;
         mainCanvas.SetActive(false);
     }
 
     public void Upgrade()
     {
-        if (targetNode != null)
+        if (_targetNode != null)
         {
-            targetNode.RequestUpgrade();
+            _targetNode.RequestUpgrade();
             Hide();
         }
     }
 
     public void Sell()
     {
-        if (targetNode != null)
+        if (_targetNode != null)
         {
-            targetNode.RequestSell();
+            _targetNode.RequestSell();
             Hide();
         }
     }

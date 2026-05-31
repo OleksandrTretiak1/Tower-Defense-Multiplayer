@@ -5,6 +5,10 @@ using Mirror;
 
 public class MissileTurret : NetworkBehaviour
 {
+    [Header("Upgrade Economics")]
+    public int upgradeCostLvl2 = 120;
+    public int upgradeCostLvl3 = 250;
+
     [Header("Attributes")]
     [SerializeField] private float rotationSpeed = 10f;
 
@@ -37,10 +41,6 @@ public class MissileTurret : NetworkBehaviour
     [SerializeField] private AudioSource shootingAudioSource;
     [SerializeField] private AudioClip shootSound;
 
-    [Header("Upgrade Economics")]
-    public int upgradeCostLvl2 = 120;
-    public int upgradeCostLvl3 = 250;
-
     private float _range;
     private float _fireRate;
     private float _fireCountdown = 0f;
@@ -48,20 +48,20 @@ public class MissileTurret : NetworkBehaviour
 
     [SyncVar] private GameObject _syncedTarget;
 
-    void Start()
+    private void Start()
     {
         SetLevelStats();
         SetupLevelVisuals();
 
         if (isServer)
         {
-            InvokeRepeating("UpdateTarget", 0f, 0.5f);
+            InvokeRepeating(nameof(UpdateTarget), 0f, 0.5f);
         }
 
         LinkToNode();
     }
 
-    void Update()
+    private void Update()
     {
         if (_syncedTarget != null)
         {
@@ -260,7 +260,7 @@ public class MissileTurret : NetworkBehaviour
         missile.SetActive(true);
     }
 
-    void OnDrawGizmosSelected()
+    private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.cyan;
         Gizmos.DrawWireSphere(transform.position, _range);

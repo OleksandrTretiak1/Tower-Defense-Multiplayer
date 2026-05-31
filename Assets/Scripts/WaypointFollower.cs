@@ -9,7 +9,7 @@ public class WaypointFollower : NetworkBehaviour
     private Transform[] _waypoints;
     private int _currentWaypointIndex = 0;
 
-    void Awake()
+    private void Awake()
     {
         GameObject pointsParent = GameObject.Find("Waypoints");
 
@@ -34,7 +34,7 @@ public class WaypointFollower : NetworkBehaviour
         }
     }
 
-    void Update()
+    private void Update()
     {
         if (!isServer)
         {

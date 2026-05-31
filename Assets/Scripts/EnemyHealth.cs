@@ -6,6 +6,9 @@ public class EnemyHealth : NetworkBehaviour
 {
     public static List<EnemyHealth> AllEnemies = new List<EnemyHealth>();
 
+    [Header("Base Damage")]
+    public int damageToBase = 10;
+
     [SyncVar]
     [SerializeField] private int health = 50;
 
@@ -15,9 +18,6 @@ public class EnemyHealth : NetworkBehaviour
 
     [Header("Rewards")]
     [SerializeField] private int moneyReward = 10;
-
-    [Header("Base Damage")]
-    public int damageToBase = 10;
 
     private void OnEnable()
     {
@@ -45,7 +45,7 @@ public class EnemyHealth : NetworkBehaviour
     }
 
     [Server]
-    void Die()
+    private void Die()
     {
         if (CurrencyManager.instance != null)
         {
@@ -58,7 +58,7 @@ public class EnemyHealth : NetworkBehaviour
     }
 
     [ClientRpc]
-    void RpcHandleDeath(Vector3 deathPosition)
+    private void RpcHandleDeath(Vector3 deathPosition)
     {
         if (deathVFX != null)
         {
@@ -71,7 +71,7 @@ public class EnemyHealth : NetworkBehaviour
         }
     }
 
-    void PlaySound2D(AudioClip clip)
+    private void PlaySound2D(AudioClip clip)
     {
         if (clip == null)
         {

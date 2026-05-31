@@ -138,8 +138,14 @@ public class Node : MonoBehaviour, IPointerClickHandler
         if (t != null)
         {
             int invested = BuildManager.instance.standardTurretPrice;
-            if (t.GetCurrentLevel() >= 2) invested += t.upgradeCostLvl2;
-            if (t.GetCurrentLevel() >= 3) invested += t.upgradeCostLvl3;
+            if (t.GetCurrentLevel() >= 2)
+            {
+                invested += t.upgradeCostLvl2;
+            }
+            if (t.GetCurrentLevel() >= 3)
+            {
+                invested += t.upgradeCostLvl3;
+            }
 
             return Mathf.RoundToInt(invested * 0.5f);
         }
@@ -148,8 +154,14 @@ public class Node : MonoBehaviour, IPointerClickHandler
         if (mt != null)
         {
             int invested = BuildManager.instance.missileTurretPrice;
-            if (mt.GetCurrentLevel() >= 2) invested += mt.upgradeCostLvl2;
-            if (mt.GetCurrentLevel() >= 3) invested += mt.upgradeCostLvl3;
+            if (mt.GetCurrentLevel() >= 2)
+            {
+                invested += mt.upgradeCostLvl2;
+            }
+            if (mt.GetCurrentLevel() >= 3)
+            {
+                invested += mt.upgradeCostLvl3;
+            }
 
             return Mathf.RoundToInt(invested * 0.5f);
         }
@@ -170,16 +182,28 @@ public class Node : MonoBehaviour, IPointerClickHandler
         if (t != null)
         {
             int lvl = t.GetCurrentLevel();
-            if (lvl == 1) return t.upgradeCostLvl2;
-            if (lvl == 2) return t.upgradeCostLvl3;
+            if (lvl == 1)
+            {
+                return t.upgradeCostLvl2;
+            }
+            if (lvl == 2)
+            {
+                return t.upgradeCostLvl3;
+            }
             return 0;
         }
 
         if (mt != null)
         {
             int lvl = mt.GetCurrentLevel();
-            if (lvl == 1) return mt.upgradeCostLvl2;
-            if (lvl == 2) return mt.upgradeCostLvl3;
+            if (lvl == 1)
+            {
+                return mt.upgradeCostLvl2;
+            }
+            if (lvl == 2)
+            {
+                return mt.upgradeCostLvl3;
+            }
             return 0;
         }
 

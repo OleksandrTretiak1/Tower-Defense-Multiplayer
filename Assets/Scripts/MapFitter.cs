@@ -4,16 +4,16 @@ using UnityEngine;
 public class MapFitter : MonoBehaviour
 {
     public float defaultOrthoSize = 5f;
-    private float targetAspect = 16f / 9f;
+    private float _targetAspect = 16f / 9f;
 
-    void Start()
+    private void Start()
     {
         Camera cam = GetComponent<Camera>();
         float currentAspect = (float)Screen.width / (float)Screen.height;
 
-        if (currentAspect < targetAspect)
+        if (currentAspect < _targetAspect)
         {
-            cam.orthographicSize = defaultOrthoSize * (targetAspect / currentAspect);
+            cam.orthographicSize = defaultOrthoSize * (_targetAspect / currentAspect);
         }
         else
         {

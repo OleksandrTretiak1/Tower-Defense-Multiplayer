@@ -38,14 +38,14 @@ public class Spawner : NetworkBehaviour
     private AudioSource _audioSource;
     [HideInInspector] [SyncVar] public int currentWaveIndex = 0;
 
-    void Awake()
+    private void Awake()
     {
         _audioSource = gameObject.AddComponent<AudioSource>();
         _audioSource.playOnAwake = false;
         _audioSource.spatialBlend = 0f;
     }
 
-    void Start()
+    private void Start()
     {
         if (backgroundMusic != null)
         {
@@ -60,7 +60,7 @@ public class Spawner : NetworkBehaviour
         StartCoroutine(SpawnAllWaves());
     }
 
-    IEnumerator SpawnAllWaves()
+    private IEnumerator SpawnAllWaves()
     {
         yield return new WaitForSeconds(0.2f);
 

@@ -11,21 +11,24 @@ public class ShopUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI standardPriceText;
     [SerializeField] private TextMeshProUGUI missilePriceText;
 
-    private Node targetNode;
+    private Node _targetNode;
 
-    void Awake()
+    private void Awake()
     {
-        if (instance == null) instance = this;
+        if (instance == null)
+        {
+            instance = this;
+        }
         Hide();
     }
 
-    void Start()
+    private void Start()
     {
         standardPriceText.text = "$" + BuildManager.instance.standardTurretPrice;
         missilePriceText.text = "$" + BuildManager.instance.missileTurretPrice;
     }
 
-    void Update()
+    private void Update()
     {
         if (mainCanvas.activeSelf && Pointer.current.press.wasPressedThisFrame)
         {
@@ -38,7 +41,10 @@ public class ShopUI : MonoBehaviour
 
     private bool IsPointerOverUIElement()
     {
-        if (EventSystem.current.IsPointerOverGameObject()) return true;
+        if (EventSystem.current.IsPointerOverGameObject())
+        {
+            return true;
+        }
 
         if (Input.touchCount > 0)
         {
@@ -56,26 +62,26 @@ public class ShopUI : MonoBehaviour
 
     public void SetTarget(Node node)
     {
-        targetNode = node;
+        _targetNode = node;
         transform.position = node.transform.position;
         mainCanvas.SetActive(true);
     }
 
     public void Hide()
     {
-        targetNode = null;
+        _targetNode = null;
         mainCanvas.SetActive(false);
     }
 
     public void SelectStandard()
     {
-        BuildManager.instance.BuildTurretOn(targetNode, "Standard");
+        BuildManager.instance.BuildTurretOn(_targetNode, "Standard");
         Hide();
     }
 
     public void SelectMissile()
     {
-        BuildManager.instance.BuildTurretOn(targetNode, "Missile");
+        BuildManager.instance.BuildTurretOn(_targetNode, "Missile");
         Hide();
     }
 }

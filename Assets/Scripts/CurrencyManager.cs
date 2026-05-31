@@ -15,9 +15,12 @@ public class CurrencyManager : NetworkBehaviour
     [Header("UI")]
     [SerializeField] private SpriteNumberDisplay moneyVisual;
 
-    void Awake()
+    private void Awake()
     {
-        if (instance == null) instance = this;
+        if (instance == null)
+        {
+            instance = this;
+        }
     }
 
     public override void OnStartServer()
@@ -25,7 +28,7 @@ public class CurrencyManager : NetworkBehaviour
         _currentMoney = startingMoney;
     }
 
-    void Start()
+    private void Start()
     {
         UpdateUI(_currentMoney);
     }

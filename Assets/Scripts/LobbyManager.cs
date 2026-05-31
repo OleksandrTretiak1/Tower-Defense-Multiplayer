@@ -32,7 +32,7 @@ public class LobbyManager : MonoBehaviour
 
     private bool _isWaitingForPlayer = false;
 
-    void Start()
+    private void Start()
     {
         StartButtonsPanel.SetActive(true);
 
@@ -56,7 +56,7 @@ public class LobbyManager : MonoBehaviour
         UpdateHighscores();
     }
 
-    void Update()
+    private void Update()
     {
         if (_isWaitingForPlayer && NetworkServer.active && NetworkServer.connections.Count == 2)
         {
