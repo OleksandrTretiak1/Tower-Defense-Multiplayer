@@ -13272,10 +13272,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d2931c00a160f254caab6dd3eb2fde8d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BuildManager
-  standardTurretPrefab: {fileID: 8224298794960880972, guid: 8c8b3c674c08f4c4884b88b469126e22, type: 3}
-  missileTurretPrefab: {fileID: 8224298794960880972, guid: 4affb17880b97d942b2800144c089512, type: 3}
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   standardTurretPrice: 50
   missileTurretPrice: 150
+  standardTurretPrefab: {fileID: 8224298794960880972, guid: 8c8b3c674c08f4c4884b88b469126e22, type: 3}
+  missileTurretPrefab: {fileID: 8224298794960880972, guid: 4affb17880b97d942b2800144c089512, type: 3}
   globalBuildSound: {fileID: 8300000, guid: fe0b1f9aeb45b41b089175aeeabd5d95, type: 3}
   globalUpgradeSound: {fileID: 8300000, guid: 9158afb6966d445db9caf1dccf7acbcc, type: 3}
   globalSellSound: {fileID: 8300000, guid: cf6c0e7fbef9449c98a0cdb5ea0c4d9f, type: 3}
@@ -13291,7 +13294,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f2d83fb244eaa3f429d66a1342980a4e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CurrencyManager
-  startingMoney: 200
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  startingMoney: 250
   moneyVisual: {fileID: 1155795503}
 --- !u!114 &1725371397
 MonoBehaviour:
